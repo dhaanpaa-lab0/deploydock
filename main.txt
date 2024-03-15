@@ -1,0 +1,48 @@
+package main
+
+import (
+	"fmt"
+	i "nexus-sds.com/deploydock/interfaces"
+	svcs "nexus-sds.com/deploydock/services"
+	u "nexus-sds.com/deploydock/utilities"
+	"strings"
+)
+
+func main() {
+	ddkConfig := u.LoadConfig()
+
+	url := u.CreateUrl(ddkConfig)
+	fmt.Printf("Git URL .......... : '%s'\n", url)
+	fmt.Printf("Git Branch ....... : '%s'\n", ddkConfig.GitBranch)
+	fmt.Printf("Server Root ...... : '%s'\n", ddkConfig.ServerRoot)
+
+	if !u.FileExists(ddkConfig.ServerRoot) {
+		svcs.SetupDeployDockGitRepo(ddkConfig, url)
+	} else {
+		svcs.UpdateDeployDockGitRepo(ddkConfig)
+	}
+
+	containers := i.GetDockerContainerImageNames()
+	fmt.Printf("Containers .......... : %v\n", containers)
+	services := i.GetComposeServices()
+	fmt.Printf("Services ............ : %v\n", services)
+	projects := i.GetComposeProjects()
+	fmt.Printf("Projects ............ : %v\n", projects)
+	configFiles := i.GetComposeProjectConfigFiles()
+	fmt.Printf("Config Files ........ : %v\n", configFiles)
+	workingDirs := i.GetComposeProjectWorkingDirectories()
+	fmt.Printf("Working Directories . : %v\n", u.InvertStringMap(workingDirs))
+	projectNames := i.GetComposeProjectWorkingDirectoriesFiltered("")
+	fmt.Printf("Projects by Directory : %v\n", projectNames)
+	projectNamesFiltered := i.GetComposeProjectWorkingDirectoriesFiltered(ddkConfig.ServerRoot)
+	fmt.Printf("Projects by Directory : %v\n", projectNamesFiltered)
+
+	latestCommit := i.GitGetLatestCommit(ddkConfig.ServerRoot)
+	fmt.Printf("Latest Commit ....... : '%s'\n", latestCommit)
+	latestCommitFiles := i.GitGetListOfFilesInCommit(ddkConfig.ServerRoot, latestCommit)
+	fmt.Printf("Latest Commit Files . : %v\n", strings.Join(latestCommitFiles, ", "))
+	latestComposeFiles := u.FilterStringArrayByEndsWith(latestCommitFiles, "compose.yaml")
+	fmt.Printf("Latest Compose Files : %v\n", strings.Join(latestComposeFiles, ", "))
+	latestComposeFilesPrefixed := u.AddPathPrefixToStringArray(latestComposeFiles, ddkConfig.ServerRoot)
+	fmt.Printf("Latest Compose Files : %v\n", strings.Join(latestComposeFilesPrefixed, ", "))
+}

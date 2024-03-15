@@ -4,7 +4,9 @@ import (
 	"errors"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"os/exec"
+	"strings"
 )
 
 func GitClone(srcUrl string, destPath string) (string, int) {
@@ -27,6 +29,33 @@ func GitPull(repoPath string) (string, int) {
 		return string(output), 0
 	}
 
+}
+
+func GitSubmitMessage(repoPath string, message string) (string, int) {
+	totalOutput := ""
+	exitCodeNeeded := 0
+	outputGitAddCommand, errGitAddCommand := exec.Command("git", "-C", repoPath, "add", "-A", ".").CombinedOutput()
+	if errGitAddCommand != nil {
+		var exitError *exec.ExitError
+		errors.As(errGitAddCommand, &exitError)
+		return string(outputGitAddCommand), exitError.ExitCode()
+
+	} else {
+		totalOutput = strings.Join([]string{totalOutput, string(outputGitAddCommand)}, "\n\n")
+		exitCodeNeeded = 0
+	}
+
+	outputCommit, errCommitCommnad := exec.Command("git", "-C", repoPath, "commit", "-a", "-m", "\""+message+"\"").CombinedOutput()
+	if errCommitCommnad != nil {
+		var exitError *exec.ExitError
+		errors.As(errCommitCommnad, &exitError)
+		return string(outputCommit), exitError.ExitCode()
+	} else {
+		totalOutput = strings.Join([]string{totalOutput, string(outputGitAddCommand)}, "\n\n")
+		exitCodeNeeded = 0
+	}
+
+	return totalOutput, exitCodeNeeded
 }
 
 func GitCheckout(repoPath string, branch string) (string, int) {
@@ -62,16 +91,16 @@ func GitCleanForce(repoPath string) (string, int) {
 	}
 }
 
-func GitGetLatestCommit(repoPath string) (string, int) {
+func GitGetLatestCommit(repoPath string) string {
 	open, err := git.PlainOpen(repoPath)
 	if err != nil {
-		return "", 0
+		return ""
 	}
 	ref, err := open.Head()
 	if err != nil {
-		return "", 0
+		return ""
 	}
-	return ref.Hash().String(), 0
+	return ref.Hash().String()
 }
 
 func GitGetMessage(repoPath string, gitHash string) (string, int) {
@@ -86,4 +115,35 @@ func GitGetMessage(repoPath string, gitHash string) (string, int) {
 	}
 
 	return commitObject.Message, 0
+}
+
+func GitGetListOfFilesInCommit(repoPath string, gitHash string) []string {
+	hash := plumbing.NewHash(gitHash)
+	open, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return nil
+	}
+
+	commitObject, err := open.CommitObject(hash)
+	if err != nil {
+		return nil
+	}
+	files := make([]string, 0)
+	commitFiles, err := commitObject.Files()
+	if err != nil {
+		return nil
+	}
+
+	errLoopingThroughFiles := commitFiles.ForEach(func(file *object.File) error {
+		files = append(files, file.Name)
+		return nil
+	})
+	if errLoopingThroughFiles != nil {
+		return nil
+	}
+
+	if err != nil {
+		return nil
+	}
+	return files
 }

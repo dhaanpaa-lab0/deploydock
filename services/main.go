@@ -8,7 +8,7 @@ import (
 )
 
 func SetupDeployDockGitRepo(ddkConfig u.Config, url string) {
-	errCreatingDirectory := os.MkdirAll(ddkConfig.ServerRoot, 0755)
+	errCreatingDirectory := os.MkdirAll(ddkConfig.ServerRoot, 0775)
 	if errCreatingDirectory != nil {
 		log.Fatalln(errCreatingDirectory)
 	}

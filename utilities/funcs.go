@@ -1,7 +1,9 @@
 package utilities
 
 import (
+	"fmt"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -72,4 +74,53 @@ func ParsePath(path string) string {
 		return path
 	}
 	return path
+}
+
+func FilterStringArrayByEndsWith(inputArray []string, suffix string) []string {
+	var filteredArray []string
+	for _, str := range inputArray {
+		if strings.HasSuffix(str, suffix) {
+			filteredArray = append(filteredArray, str)
+		}
+	}
+	return filteredArray
+}
+
+func FilterStringArrayByStartsWith(inputArray []string, prefix string) []string {
+	var filteredArray []string
+	for _, str := range inputArray {
+		if strings.HasPrefix(str, prefix) {
+			filteredArray = append(filteredArray, str)
+		}
+	}
+	return filteredArray
+}
+
+func AddPrefixToStringArray(inputArray []string, prefix string) []string {
+	var resultArray []string
+	for _, str := range inputArray {
+		resultArray = append(resultArray, prefix+str)
+	}
+	return resultArray
+}
+
+func AddPathPrefixToStringArray(inputArray []string, prefix string) []string {
+	var resultArray []string
+	for _, str := range inputArray {
+		resultArray = append(resultArray, path.Join(prefix, str))
+	}
+	return resultArray
+}
+
+func DeleteDir(dir string) {
+	if FileExists(dir) {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			return
+		}
+	} else {
+		fmt.Printf("Directory %s does not exist\n", dir)
+		return
+	}
+
 }

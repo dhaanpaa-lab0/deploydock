@@ -3,7 +3,7 @@ git_user: "git"
 git_host: "github.com"
 git_org: "dentechnologies"
 git_repo: "mdm-server"
-server_root: "./tmp"
+server_root: "./data/"
 git_branch: "main"
 
 

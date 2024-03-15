@@ -11,7 +11,7 @@ import (
 //Label: com.docker.compose.project.working_dir, Value: /Users/dhaanpaa/src/geodata-bknd
 //Label: com.docker.compose.project.config_files, Value: /Users/dhaanpaa/src/geodata-bknd/compose.yml
 
-func GetProjectConfigFiles() map[string]string {
+func GetComposeProjectConfigFiles() map[string]string {
 	apiClient, err := client.NewClientWithOpts(client.FromEnv)
 
 	if err != nil {
@@ -36,7 +36,7 @@ func GetProjectConfigFiles() map[string]string {
 	return projectConfigFiles
 }
 
-func GetProjectWorkingDirectories() map[string]string {
+func GetComposeProjectWorkingDirectories() map[string]string {
 	apiClient, err := client.NewClientWithOpts(client.FromEnv)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func GetProjectWorkingDirectories() map[string]string {
 
 }
 
-func GetListOfComposeProjects() []string {
+func GetComposeProjects() []string {
 	apiClient, err := client.NewClientWithOpts(client.FromEnv)
 
 	if err != nil {
@@ -83,7 +83,7 @@ func GetListOfComposeProjects() []string {
 	return u.UniqueStrings(listOfProjects)
 }
 
-func GetListOfComposeServices() []string {
+func GetComposeServices() []string {
 	apiClient, err := client.NewClientWithOpts(client.FromEnv)
 
 	if err != nil {
@@ -107,7 +107,7 @@ func GetListOfComposeServices() []string {
 	return u.UniqueStrings(listOfServices)
 }
 
-func GetListOfContainers() []string {
+func GetDockerContainerImageNames() []string {
 	apiClient, err := client.NewClientWithOpts(client.FromEnv)
 
 	if err != nil {
@@ -129,7 +129,7 @@ func GetListOfContainers() []string {
 	return listOfContainers
 }
 
-func GetComposeProjectsFilteredByDirectory(prefix string) map[string]string {
-	m := u.InvertStringMap(GetProjectWorkingDirectories())
+func GetComposeProjectWorkingDirectoriesFiltered(prefix string) map[string]string {
+	m := u.InvertStringMap(GetComposeProjectWorkingDirectories())
 	return u.FilterMapByKeyPrefix(m, prefix)
 }
